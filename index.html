@@ -1,0 +1,1303 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sod Poodles Fan Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#1B2A4A;--navy-2:#1e3260;--gold:#D4A017;--red:#C8122A;--lightblue:#4AABDB;
+  --light:#F4F6FA;--white:#ffffff;--green:#2ECC71;--orange:#E67E22;
+  --text-muted:#6B7280;--border:#E2E8F0;--soft:#F8FAFC;
+  --blue:#1B2A4A;--blue-dark:#1B2A4A;--blue-hover:#243b6c;--surface:#ffffff;--surface2:#F8FAFC;
+  --text-primary:#1B2A4A;--text-secondary:#4B5563;--text-tertiary:#6B7280;
+  --green-light:#D1FAE5;--amber:#D97706;--amber-light:#FEF3C7;--red-light:#FEE2E2;
+  --radius:10px;--radius-sm:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',system-ui,-apple-system,Segoe UI,sans-serif;background:var(--light);color:var(--navy);min-height:100vh;display:block;font-size:13.5px;line-height:1.5;}
+
+#sidebar{position:relative;width:100%;background:transparent;border:0;display:block;z-index:1;}
+.logo-area{background:var(--navy);padding:18px 40px;display:flex;align-items:center;gap:16px;border:0;}
+.logo-area img{height:56px;width:56px;object-fit:contain;filter:none;}
+.logo-text{color:var(--white);font-size:22px;font-weight:800;letter-spacing:.2px;line-height:1.05;}
+.logo-sub{display:block;color:#94A3B8;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:none;margin-top:5px;}
+.season-wrap{background:var(--navy-2);padding:10px 40px;display:flex;align-items:center;gap:12px;border:0;}
+.season-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);white-space:nowrap;margin:0;}
+.season-wrap select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:var(--white);padding:7px 32px 7px 12px;border-radius:20px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23D4A017'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.season-wrap select option{background:var(--navy);color:white;}
+nav{background:var(--white);border-bottom:1px solid var(--border);padding:10px 40px;display:flex;align-items:center;gap:12px;overflow-x:auto;}
+.nav-group-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);white-space:nowrap;padding:0;}
+.nav-item{display:flex;align-items:center;gap:6px;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all .15s;text-align:left;color:var(--navy);font-size:13px;font-weight:800;white-space:nowrap;margin:0;}
+.nav-item:hover{border-color:var(--lightblue);background:#F0F9FF;transform:none;}
+.nav-item.active{background:var(--navy);border-color:var(--navy);color:var(--white);}
+.nav-dot{display:none;}
+
+#main{margin-left:var(--sidebar,220px);min-height:100vh;display:flex;flex-direction:column;}
+#topbar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 40px;min-height:auto;display:flex;align-items:center;justify-content:space-between;position:relative;top:auto;z-index:1;}
+.page-title{font-size:13px;font-weight:800;color:var(--navy);letter-spacing:0;}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.data-note{font-size:11px;color:var(--text-muted);}
+.season-badge{background:rgba(212,160,23,.15);border:1px solid var(--gold);color:#8a6500;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;}
+#content{padding:28px 40px;max-width:1400px;margin:0 auto;width:100%;}
+.page{display:none;}.page.active{display:block;}
+
+.season-banner{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.banner-left{display:flex;align-items:center;gap:14px;}
+.banner-badge{background:rgba(212,160,23,.15);border:1px solid var(--gold);color:#8a6500;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;}
+.banner-text{color:var(--navy);font-size:13px;font-weight:800;}.banner-text span{color:var(--text-muted);font-weight:600;}
+.banner-stats{display:flex;gap:28px;}.banner-stat{text-align:right;}.banner-stat-val{color:var(--navy);font-size:22px;font-weight:800;font-family:'DM Mono',monospace;display:block;line-height:1;}.banner-stat-label{color:var(--text-muted);font-size:11px;}
+
+.section-label{font-size:18px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:1px;margin:28px 0 14px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);} .section-label:first-child{margin-top:0;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px;}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:28px;}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}.g1{margin-bottom:28px;}.span2{grid-column:span 2;}.span3{grid-column:span 3;}
+.card{background:var(--white);border-radius:10px;padding:20px 22px;border:1px solid var(--border);box-shadow:none;}
+.card-title{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);margin-bottom:14px;}
+.kpi{background:var(--white);border-radius:10px;padding:18px 20px;border:1px solid var(--border);min-height:118px;box-shadow:none;}
+.kpi-label{font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.kpi-value{font-family:'DM Mono',monospace;font-size:29px;font-weight:800;color:var(--navy);margin-top:4px;line-height:1;letter-spacing:-.2px;overflow-wrap:anywhere;}
+.kpi-sub{font-size:11px;color:var(--text-muted);margin-top:6px;}.kpi-delta{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;margin-top:8px;padding:4px 8px;border-radius:10px;}
+.delta-up{background:#D1FAE5;color:#059669;}.delta-down{background:#FEE2E2;color:#DC2626;}.delta-flat{background:#FEF3C7;color:#D97706;}
+.insight{background:var(--navy);border-radius:10px;padding:18px 20px;border:0;border-left:4px solid var(--gold);box-shadow:none;font-size:14px;line-height:1.6;color:#CBD5E1;margin-bottom:12px;}
+.insight:last-child{margin-bottom:0;}.insight strong{display:block;color:var(--white);font-weight:800;margin-bottom:6px;font-size:14px;}.insight-red,.insight-green,.insight-blue,.insight-amber{border-left-color:var(--gold);}
+.chart-wrap{position:relative;min-height:120px;}.tbl{width:100%;border-collapse:collapse;font-size:12px;}.tbl th{text-align:left;padding:7px 10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);border-bottom:2px solid var(--border);}.tbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:#374151;font-size:12.5px;}.tbl tr:last-child td{border-bottom:none;}.tbl tr:hover td{background:#F8FAFC;}.tbl .num{font-family:'DM Mono',monospace;font-size:12px;color:var(--navy);text-align:right;white-space:nowrap;}.tbl th.num{text-align:right;}.rev-bar-cell{display:flex;align-items:center;justify-content:flex-end;gap:8px;}.rev-bar{height:6px;border-radius:3px;background:var(--lightblue);min-width:2px;flex:0 0 auto;}
+.toggle-group{display:inline-flex;background:var(--white);gap:8px;margin-bottom:14px;flex-wrap:wrap;}.toggle-btn{background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;transition:all .15s;text-align:left;color:var(--navy);font-size:12px;font-weight:800;}.toggle-btn:hover{border-color:var(--lightblue);background:#F0F9FF;}.toggle-btn.active{background:var(--navy);border-color:var(--navy);color:var(--white);box-shadow:none;}
+.ret-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}.ret-cell{background:#F8FAFC;border-radius:10px;padding:14px;border:1px solid var(--border);}.ret-season{font-size:12px;font-weight:800;color:var(--navy);letter-spacing:.5px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--border);}.ret-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 0;font-size:12px;}.ret-label{color:#374151;font-weight:600;}.ret-val{font-family:'DM Mono',monospace;font-size:11px;font-weight:800;}.ret-new{color:var(--navy);}.ret-returning{color:#059669;}.ret-lapsed{color:#DC2626;}.ret-wonback{color:#D97706;}.ret-buyer{color:var(--navy);}
+.pace-row{display:grid;grid-template-columns:92px repeat(4,minmax(100px,1fr));gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;overflow-x:auto;}.pace-row:last-child{border-bottom:none;}.pace-type{font-weight:800;color:#374151;font-size:12px;}.pace-val{font-family:'DM Mono',monospace;font-size:12px;color:var(--navy);}.pace-header{grid-template-columns:92px repeat(4,minmax(100px,1fr));}.pace-header div{font-size:10px;font-weight:800;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;}.pace-current{color:var(--red);font-weight:800;}.pace-delta-cell{font-size:11px;font-weight:800;}
+.upgrade-badge{display:inline-block;background:#FEE2E2;color:#DC2626;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:3px;letter-spacing:.5px;text-transform:uppercase;}.data-source{font-size:11px;color:var(--text-muted);margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}p{color:var(--text-muted);}
+@media (max-width:1100px){.g4{grid-template-columns:repeat(2,1fr);}.g3{grid-template-columns:repeat(2,1fr);}.ret-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:820px){.logo-area,.season-wrap,nav,#topbar{padding-left:16px;padding-right:16px;}.logo-area{align-items:flex-start;}.logo-text{font-size:18px;}.season-wrap,#topbar{align-items:flex-start;flex-direction:column;}#content{padding:20px 16px;}.g2,.g3,.g4,.ret-grid{grid-template-columns:1fr;}.banner-stats{width:100%;justify-content:space-between;gap:12px;}.banner-stat{text-align:left;}.pace-row,.pace-header{grid-template-columns:88px repeat(4,108px);}.section-label{font-size:15px;}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="logo-area">
+    <img src="https://www.mlbstatic.com/team-logos/5368.svg" alt="SP" onerror="this.style.display='none'">
+    <div class="logo-text">Sod Poodles <span class="logo-sub">Fan Analytics Dashboard</span></div>
+  </div>
+
+  <div class="season-wrap">
+    <div class="season-label">Season Filter</div>
+    <select id="globalSeason" onchange="setSeason(this.value)">
+      <option value="all">All Seasons</option>
+      <option value="2026">2026 Season</option>
+      <option value="2025">2025 Season</option>
+      <option value="2024">2024 Season</option>
+      <option value="2023">2023 Season</option>
+    </select>
+  </div>
+
+  <nav>
+    <div class="nav-group-label">Pages</div>
+    <div class="nav-item active" onclick="showPage('overview')"><div class="nav-dot"></div>Overview</div>
+    <div class="nav-item" onclick="showPage('single')"><div class="nav-dot"></div>Single Buyers</div>
+    <div class="nav-item" onclick="showPage('package')"><div class="nav-dot"></div>Package Buyers</div>
+    <div class="nav-item" onclick="showPage('group')"><div class="nav-dot"></div>Group Buyers</div>
+  </nav>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div class="page-title" id="pageTitle">Overview</div>
+    <div class="topbar-right">
+      <span class="data-note">Data through May 28, 2026</span>
+      <span class="season-badge" id="seasonBadge">All Seasons</span>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- OVERVIEW                                -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page active" id="page-overview">
+
+      <!-- 2026 Season Banner -->
+      <div class="season-banner">
+        <div class="banner-left">
+          <div class="banner-badge">2026 Live</div>
+          <div class="banner-text">
+            Season in progress — 21 of 70 home games played (30% complete)
+            <span> · Data through May 28, 2026</span>
+          </div>
+        </div>
+        <div class="banner-stats">
+          <div class="banner-stat">
+            <span class="banner-stat-val" id="banner-rev-2026">—</span>
+            <span class="banner-stat-label">2026 Revenue to Date</span>
+          </div>
+          <div class="banner-stat">
+            <span class="banner-stat-val" id="banner-vs-2025">—</span>
+            <span class="banner-stat-label">vs May 28, 2025</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="section-label">Season Performance</div>
+      <div class="g4" id="overview-kpis"></div>
+
+
+
+      <!-- Revenue Charts -->
+      <div class="section-label">Revenue Breakdown</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Total Revenue by Season</div>
+          <div class="chart-wrap"><canvas id="chart-rev-season" height="200"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Revenue by Buyer Type — At Same Point Each Season (Through May 28)</div>
+          <div class="chart-wrap"><canvas id="chart-rev-type-cutoff" height="200"></canvas></div>
+        </div>
+      </div>
+      <div class="card g1">
+        <div class="card-title">Revenue Share by Buyer Type</div>
+          <div style="max-width:260px;margin:0 auto">
+        <div class="chart-wrap"><canvas id="chart-rev-share-type" height="200" style="max-width:260px" height="95"></canvas></div>
+      </div>
+
+
+
+      <!-- Geography -->
+      <div class="section-label">Geography — Revenue by ZIP Code (Top 10)</div>
+      <div class="card g1">
+        <div class="card-title">Which ZIP Codes Are Spending the Most?</div>
+        <div class="chart-wrap"><canvas id="chart-zip" height="140"></canvas></div>
+      </div>
+
+      <!-- Retention -->
+      <div class="section-label">Customer Retention</div>
+      <div class="g1">
+        <div class="card">
+          <div class="card-title">How Many Customers Came Back Each Season?</div>
+          <p style="font-size:11.5px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6">
+            <strong>New</strong> — first time buying · <strong>Returning</strong> — bought the prior season too · <strong>Won Back</strong> — skipped at least one season then returned · <strong>Lapsed</strong> — bought before but didn't purchase this season
+          </p>
+          <div class="ret-grid" id="retention-detail"></div>
+        </div>
+
+      </div>
+
+      <!-- Revenue Trend -->
+      <div class="section-label">Cumulative Revenue Through the Season</div>
+      <div class="card g1">
+        <div class="card-title">How Does 2026 Revenue Track vs Prior Seasons? (Week by Week)</div>
+        <div class="chart-wrap"><canvas id="chart-rev-trend" height="200"></canvas></div>
+      </div>
+
+      <!-- Pace - shown only when 2026 selected -->
+      <div id="pace-section-overview" style="display:none">
+        <div class="section-label">2026 Pace vs Prior Seasons (Through May 28)</div>
+        <div class="card g1">
+          <div class="card-title">Revenue at This Point in the Season — By Buyer Type</div>
+          <div class="pace-row pace-header" style="margin-bottom:4px">
+            <div></div>
+            <div>2023</div><div>2024</div><div>2025</div><div>2026 ▸ Now</div>
+          </div>
+          <div id="pace-table"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- SINGLE BUYERS                           -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-single">
+
+      <div class="g4" id="single-kpis"></div>
+
+
+
+      <!-- Walkup -->
+      <div class="section-label">Day-of-Game Purchases (Walkups)</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">What % of Single Buyers Purchase the Day of the Game?</div>
+          <div class="chart-wrap"><canvas id="chart-walkup-pct" height="180"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Walkup Purchases by Game Day</div>
+          <p style="font-size:11px;color:var(--text-secondary);margin-bottom:10px">Distribution of last-minute purchases by game day.</p>
+          <div class="chart-wrap"><canvas id="chart-walkup-dow" height="180"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Purchase Day of Week -->
+      <div class="section-label">When Are Tickets Being Purchased?</div>
+      <div class="card g1">
+        <div class="card-title">Purchase Day of Week — When Do Single Buyers Buy?</div>
+        <div class="toggle-group">
+          <button class="toggle-btn active" onclick="setDOWFilter('single','all',this)">All Purchases</button>
+          <button class="toggle-btn" onclick="setDOWFilter('single','advance',this)">Advance Only</button>
+          <button class="toggle-btn" onclick="setDOWFilter('single','walkup',this)">Walkup Only</button>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-single-dow" height="140"></canvas></div>
+      </div>
+
+      <!-- Lead Time -->
+      <div class="section-label">How Far in Advance Are Tickets Being Purchased?</div>
+      <div class="card g1">
+        <div class="card-title">Purchase Timing by Season — % of Transactions in Each Window</div>
+        <div class="chart-wrap"><canvas id="chart-single-lead" height="130"></canvas></div>
+      </div>
+
+      <!-- Products & ZIP -->
+      <div class="section-label">Products & Geography</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Top Products by Revenue</div>
+          <div id="single-products"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Revenue by ZIP Code (Top 10)</div>
+          <div class="chart-wrap"><canvas id="chart-single-zip" height="220"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Upgrade Opportunity -->
+      <div class="section-label">Buyer Loyalty & Upgrade Opportunity</div>
+      <div class="g3">
+        <div class="card">
+          <div class="card-title">New vs. Returning Single Buyers</div>
+          <div class="chart-wrap"><canvas id="chart-single-new-ret" height="180"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Repeat Buyers Within a Season</div>
+          <p style="font-size:11.5px;color:var(--text-secondary);margin-bottom:10px">Customers who purchased single-game tickets more than once in the same season.</p>
+          <div class="chart-wrap"><canvas id="chart-repeat" height="180"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Avg Tickets Per Transaction</div>
+          
+          <div class="chart-wrap"><canvas id="chart-single-avg-tickets" height="180"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Pace -->
+      <div class="section-label">2026 Pace vs Prior Seasons</div>
+      <div class="card g1">
+        <div class="card-title">Single Buyer Revenue — Through May 28 Each Season</div>
+        <div class="chart-wrap"><canvas id="chart-single-pace" height="160"></canvas></div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PACKAGE BUYERS                          -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-package">
+
+      <div class="g4" id="package-kpis"></div>
+
+
+
+      <!-- Product Type Trend -->
+      <div class="section-label">Package Type Revenue Trend</div>
+      <div class="card g1">
+        <div class="card-title">Is Revenue Shifting Between Package Types?</div>
+        <div class="chart-wrap"><canvas id="chart-pkg-trend" height="180"></canvas></div>
+      </div>
+
+      <!-- Purchase Timing -->
+      <div class="section-label">When Are Package Tickets Being Purchased?</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Purchase Day of Week</div>
+
+          <div class="chart-wrap"><canvas id="chart-package-dow" height="160"></canvas></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:200px">
+          <div style="font-size:64px;font-weight:800;color:var(--navy);font-family:'DM Mono',monospace;line-height:1" id="pkg-lead-stat">~92%</div>
+          <div style="font-size:15px;font-weight:800;color:var(--navy);margin-top:10px">of package buyers purchase</div>
+          <div style="font-size:15px;font-weight:800;color:var(--red)">90+ days before the season</div>
+          
+        </div>
+      </div>
+
+      <!-- Products & ZIP -->
+      <div class="section-label">Products & Geography</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Top Products by Revenue</div>
+          <div id="package-products"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Revenue by ZIP Code (Top 10)</div>
+          <div class="chart-wrap"><canvas id="chart-package-zip" height="220"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Pace -->
+      <div class="section-label">2026 Pace vs Prior Seasons</div>
+      <div class="card g1">
+        <div class="card-title">Package Buyer Revenue — Through May 28 Each Season</div>
+        <div class="chart-wrap"><canvas id="chart-package-pace" height="160"></canvas></div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- GROUP BUYERS                            -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-group">
+
+      <div class="g4" id="group-kpis"></div>
+
+
+
+      <!-- Purchase Timing -->
+      <div class="section-label">When Are Group Tickets Being Purchased?</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Purchase Day of Week</div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" onclick="setDOWFilter('group','all',this)">All Purchases</button>
+            <button class="toggle-btn" onclick="setDOWFilter('group','advance',this)">Advance Only</button>
+            <button class="toggle-btn" onclick="setDOWFilter('group','walkup',this)">Walkup Only</button>
+          </div>
+          <div class="chart-wrap"><canvas id="chart-group-dow" height="180"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">How Far in Advance Are Group Tickets Purchased?</div>
+          <div class="chart-wrap"><canvas id="chart-group-lead" height="180"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Products & ZIP -->
+      <div class="section-label">Products & Geography</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">Top Group Products by Revenue</div>
+          <div id="group-products"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Revenue by ZIP Code (Top 10)</div>
+          <div class="chart-wrap"><canvas id="chart-group-zip" height="220"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Group product trend -->
+      <div class="section-label">Group Product Revenue — Are Bookings Growing or Declining?</div>
+      <div class="card g1">
+        <div class="card-title">Top Group Products — Revenue by Season</div>
+        <div class="chart-wrap"><canvas id="chart-grp-trend" height="180"></canvas></div>
+      </div>
+
+      <!-- Avg tickets -->
+      <div class="section-label">Group Size Trends</div>
+      <div class="card g1">
+        <div class="card-title">Average Tickets Per Group Transaction</div>
+        <div class="chart-wrap"><canvas id="chart-group-avg-tickets" height="140"></canvas></div>
+      </div>
+
+      <!-- Pace -->
+      <div class="section-label">2026 Pace vs Prior Seasons</div>
+      <div class="card g1">
+        <div class="card-title">Group Buyer Revenue — Through May 28 Each Season</div>
+        <div class="chart-wrap"><canvas id="chart-group-pace" height="160"></canvas></div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const TREND = {"2023": {"0": 2437355.23, "1": 2512866.55, "2": 2558795.77, "3": 2624722.15, "4": 2667115.78, "5": 2712933.94, "6": 2736909.78, "7": 2768367.78, "8": 2814958.78, "9": 2877030.98, "10": 2941296.98, "11": 2996493.98, "12": 3070960.98, "13": 3104995.98, "14": 3179062.98, "15": 3225515.92, "16": 3265491.92, "17": 3312184.92, "18": 3339975.92, "19": 3370149.92, "20": 3393489.92, "21": 3422333.92, "22": 3449041.92, "23": 3472994.92, "24": 3487804.92, "42": 3490244.92}, "2024": {"0": 2362569.92, "1": 2427305.66, "2": 2474710.0100000002, "3": 2537696.5700000003, "4": 2597383.5400000005, "5": 2642956.2500000005, "6": 2712325.6700000004, "7": 2736389.97, "8": 2787954.9000000004, "9": 2847533.8800000004, "10": 2892863.8800000004, "11": 2958190.7600000002, "12": 3009872.7600000002, "13": 3029544.7500000005, "14": 3074973.5800000005, "15": 3140074.5800000005, "16": 3199361.5800000005, "17": 3229557.7800000007, "18": 3265995.7800000007, "19": 3280650.7800000007, "20": 3319425.7800000007, "21": 3351089.7800000007, "22": 3376548.7800000007, "23": 3398645.7800000007}, "2025": {"0": 2274305.22, "1": 2378761.3400000003, "2": 2414446.24, "3": 2477734.31, "4": 2516090.98, "5": 2588636.59, "6": 2623364.57, "7": 2672690.67, "8": 2752307.46, "9": 2807487.14, "10": 2879416.39, "11": 2924526.83, "12": 3015355.71, "13": 3082694.69, "14": 3131072.77, "15": 3158545.77, "16": 3198751.77, "17": 3245306.77, "18": 3280190.02, "19": 3329953.02, "20": 3348720.02, "21": 3386318.02, "22": 3409775.02, "23": 3430220.02}, "2026": {"0": 2346693.37, "1": 2390723.2, "2": 2438642.0700000003, "3": 2481333.8800000004, "4": 2521691.8700000006, "5": 2559510.3700000006, "6": 2591050.8000000007, "7": 2637360.3700000006}};
+const D = {"cutoff_date": "2026-05-28", "season_pct_complete": 30, "home_games_played": 21, "home_games_total": 70, "kpi_by_season": {"2023": {"revenue": 3490244.92, "tickets": 317077, "transactions": 21550, "avg_spend": 161.96}, "2024": {"revenue": 3398645.78, "tickets": 303042, "transactions": 20272, "avg_spend": 167.65}, "2025": {"revenue": 3430220.02, "tickets": 288132, "transactions": 19308, "avg_spend": 177.66}, "2026": {"revenue": 2637360.37, "tickets": 248050, "transactions": 7459, "avg_spend": 353.58}}, "kpi_at_cutoff": {"2023": {"revenue": 2749010.78, "transactions": 7823, "avg_spend": 351.4}, "2024": {"revenue": 2723146.97, "transactions": 8419, "avg_spend": 323.45}, "2025": {"revenue": 2657808.67, "transactions": 7293, "avg_spend": 364.43}, "2026": {"revenue": 2636591.86, "transactions": 7448, "avg_spend": 354.0}}, "rev_by_type": {"2023": {"Package Buyers": 1768833.05, "Group Buyers": 963259.44, "Single Buyers": 758152.43}, "2024": {"Package Buyers": 1704768.24, "Group Buyers": 922469.17, "Single Buyers": 771408.37}, "2025": {"Package Buyers": 1646932.23, "Group Buyers": 948831.54, "Single Buyers": 834456.25}, "2026": {"Package Buyers": 1598143.22, "Group Buyers": 739374.76, "Single Buyers": 299842.39}}, "rev_by_type_cutoff": {"2023": {"Package Buyers": 1767953.91, "Group Buyers": 738343.44, "Single Buyers": 242713.43}, "2024": {"Package Buyers": 1690844.26, "Group Buyers": 743661.34, "Single Buyers": 288641.37}, "2025": {"Package Buyers": 1643784.63, "Group Buyers": 713800.54, "Single Buyers": 300223.5}, "2026": {"Package Buyers": 1598143.22, "Group Buyers": 739033.75, "Single Buyers": 299414.89}}, "top_products_by_type_season": {"2023": {"Package Buyers": {"FS 7 Year Renewal ('19)": 330823.47, "FS 3 Year New - Early Bird": 313688.87, "FS 5 Year Renewal ('19)": 134950.73, "FS 3 Year New": 80744.42, "FS 3 Year Renewal ('21)": 76405.39, "PS 1 Year New": 51002.26, "FS 3 Year Renewal ('22)": 46395.29, "HS 1 Year New": 40957.0, "FS 1 Year Renewal": 38333.47, "Sponsor 10 Year ('21)": 37330.79, "FS 7 Year Renewal ('21)": 37271.01, "HS 1 Year Renewal": 36588.48, "HS 3 Year New": 34456.93, "PS 3 Year Renewal ('21)": 31592.4, "HS 7 Year Renewal ('19)": 31085.74, "HS 1 Year New - Early Bird": 26949.34, "FS 1 Year New": 26161.2, "HS 3 Year Renewal ('21)": 24806.97, "HS 7 Year New": 21242.76, "HS 7 Year Renewal ('21)": 17686.96}, "Group Buyers": {"Education Credit Dugout Suite": 130899.0, "LFP": 100880.0, "Pepsi Party Deck Group": 57631.5, "Coterie Suite - Premium Date": 54371.0, "Luxury Suite": 38815.0, "Luxury Suite - Premium Date": 35326.0, "FBSW - RFP": 34531.0, "10 Game Luxury Suite Pckg": 33404.0, "Coterie Suite": 31828.0, "5 Game EDUCU Dugout Club Pckg": 29962.08, "VIP Pre-Game Party Group": 27650.0, "10 Game EDUCU Dugout Club Pckg": 27520.0, "5 Game Luxury Suite Pckg": 21055.0, "Overflow Patio": 19529.0, "Luxury Suite Add-On": 13050.0, "Sponsor - Luxury Suite": 10548.0, "5 Game Dugout Suite- Weekday": 10020.0, "STEAM Day Group": 9870.0, "LFP Tuesday": 9736.0, "Sponsor - Dugout Club": 9061.36}, "Single Buyers": {"Adult - Advanced": 386767.0, "Adult - Day of Game": 250071.2, "Child - Advanced": 34993.0, "Senior - Advanced": 22340.0, "Child - Day of Game": 18718.0, "Military - Advanced": 11594.0, "Senior - Day of Game": 11362.0, "Military - Day of Game": 9626.0, "$2 Tuesday": 4000.0, "Concourse Suite Day of Game": 2271.23, "Seat Upgrade": 1596.0, "Half/Partial Season Pre-Sale": 1084.0, "Full Season Pre-Sale": 955.0, "Special Event - Mother's Day": 640.0, "Community Voucher": 430.0, "Past Game Unused": 425.0, "Pooch Pass": 420.0, "Dugout Suite Day of Game": 412.0, "Skip Work Day Package": 400.0, "Holiday Pack Voucher": 48.0}}, "2024": {"Package Buyers": {"FS 3 Year New - Early Bird": 390123.68, "FS 7 Year Renewal ('19)": 310840.74, "FS 5 Year Renewal ('19)": 108336.09, "FS 3 Year Renewal ('23)": 79454.51, "PS 1 Year New": 65896.92, "FS 1 Year New": 53705.79, "HS 1 Year New - Early Bird": 50537.5, "HS 3 Year New": 43742.61, "HS 3 Year New - Early Bird": 42555.93, "HS 3 Year Renewal ('23)": 38991.11, "Sponsor 10 Year ('21)": 33744.72, "PS 1 Year New - Early Bird": 33422.32, "FS 3 Year Renewal ('22)": 32675.76, "FS 7 Year Renewal ('21)": 31394.91, "HS 7 Year Renewal ('19)": 29422.25, "HS 1 Year New": 25294.84, "HS 5 Year Renewal ('19)": 22688.64, "FS 1 Year New - Early Bird": 21298.74, "HS 7 Year Renewal ('23)": 18697.22, "FS 3 Year New": 18598.66}, "Group Buyers": {"Education Credit Dugout Suite": 116875.66, "LFP": 81116.13, "Group Tickets- Tax Exempt": 71876.0, "Pepsi Party Deck Group": 71762.82, "City Federal Party Deck": 64048.0, "Coterie Suite - Premium Date": 54944.51, "Luxury Suite - Premium Date": 44025.28, "Luxury Suite": 41632.09, "Coterie Suite": 32653.0, "10 Game EDUCU Dugout Club Pckg": 21920.0, "5 Game Luxury Suite Pckg": 21752.0, "FBSW - RFP": 21539.0, "LFPP- Tax Exempt": 20513.0, "5 Game EDUCU Dugout Club Pckg": 18240.0, "STEAM Day Group": 18146.0, "Luxury Suite Add-On": 13100.0, "Overflow Patio": 9558.99, "5 Game Coterie Suite Pckg": 8950.0, "10 Game Luxury Suite Pckg": 6631.0, "FEVO - Fundraiser": 5904.0}, "Single Buyers": {"Adult - Advanced": 409214.5, "Adult - Day of Game": 235243.0, "Child - Advanced": 37980.0, "Child - Day of Game": 19516.0, "Senior - Advanced": 17967.87, "Military - Advanced": 12633.0, "Military - Day of Game": 9630.0, "Senior - Day of Game": 9292.0, "$16 Voucher": 8272.0, "$2 Tuesday": 5394.0, "Dugout Suite Day of Game": 2433.0, "Community Voucher": 860.0, "Sod Pup Club": 532.0, "Concourse Suite Day of Game": 500.0, "Half/Partial Season Pre-Sale": 440.0, "Seat Upgrade": 435.0, "Skip Work Day Package": 416.0, "Past Game Unused": 394.0, "Pooch Pass": 250.0, "Full Season Pre-Sale": 6.0}}, "2025": {"Package Buyers": {"FS 3 Year New - Early Bird": 376525.27, "FS 7 Year Renewal ('19)": 297941.72, "FS 3 Year Renewal ('23)": 70159.71, "FS 3 Year Renewal - Special": 64449.69, "FS 1 Year New - Early Bird": 58348.86, "HS 3 Year New - Early Bird": 58186.55, "HS 1 Year Renewal - Early Bird": 47968.75, "PS 1 Year New - Early Bird": 45046.21, "FS 3 Year New": 44380.87, "PS 1 Year New": 40696.94, "HS 3 Year Renewal ('23)": 38077.51, "HS 3 Year Renewal ('24)": 36226.3, "FS 3 Year Renewal": 35268.37, "FS 7 Year Renewal ('21)": 31596.47, "HS 7 Year Renewal ('19)": 28693.27, "PS 3 Year New - Early Bird": 28561.46, "Sponsor 10 Year ('21)": 27608.22, "FS 1 Year New": 23644.34, "FS 7 Year Renewal ('23)": 23139.5, "FS 7 Year Renewal ('22)": 20979.03}, "Group Buyers": {"Education Credit Dugout Suite": 121821.01, "City Federal Party Deck": 86827.7, "LFP": 76787.09, "Group Tickets- Tax Exempt": 66646.0, "Pepsi Party Deck Group": 56009.42, "Coterie Suite - Premium Date": 51342.0, "Luxury Suite": 47592.83, "Luxury Suite - Premium Date": 46334.86, "Coterie Suite": 31504.0, "10 Game EDUCU Dugout Club Pckg": 27400.0, "Overflow Patio": 22126.0, "5 Game EDUCU Dugout Club Pckg": 18748.0, "FBSW - RFP": 17983.65, "5 Game Luxury Suite Pckg": 16384.0, "STEAM Day Group": 16302.0, "LFPP- Tax Exempt": 15576.0, "CF Party Deck- Tax Exempt": 14432.0, "Junior Soddies Ticket": 10469.0, "5 Game Coterie Suite Pckg": 8948.0, "Dugout Suite- Tax Exempt": 8888.0}, "Single Buyers": {"Adult - Advanced": 365503.25, "Adult - Day of Game": 286990.0, "$16 Voucher": 39894.0, "Child - Advanced": 31418.0, "Child - Day of Game": 24223.0, "Senior - Advanced": 21194.0, "Military - Advanced": 14839.0, "Senior - Day of Game": 13925.0, "Military - Day of Game": 13658.0, "Meet and Greet": 10200.0, "$2 Tuesday": 4648.0, "Sod Pup Club": 2940.0, "Flash Sale": 920.0, "Seat Upgrade": 895.0, "Full Season Pre-Sale": 882.0, "Community Voucher": 866.0, "Dugout Suite Day of Game": 725.0, "Pooch Pass": 492.0, "Holiday Pack Voucher": 72.0, "Past Game Unused": 58.0}}, "2026": {"Package Buyers": {"FS 3 Year Renewal - Special": 331881.09, "FS 7 Year Renewal ('19)": 293692.27, "FS 3 Year New - Early Bird": 150310.55, "FS 1 Year New - Early Bird": 60872.4, "FS 3 Year New": 56347.35, "PS 1 Year New - Early Bird": 49862.81, "HS 3 Year New - Early Bird": 39463.04, "FS 1 Year New": 37090.74, "FS 3 Year Renewal ('25)": 35165.35, "HS 1 Year New - Early Bird": 33696.38, "HS 1 Year New": 32784.26, "PS 1 Year New": 31277.81, "HS 3 Year Renewal ('24)": 29803.91, "Sponsor 10 Year ('21)": 27600.33, "HS 3 Year Renewal - Special": 25770.18, "FS 7 Year Renewal ('21)": 24760.32, "HS 7 Year Renewal ('19)": 22302.81, "FS 7 Year New - Early Bird": 21473.38, "FS 7 Year Renewal ('22)": 21043.9, "10 Game Plan": 20755.47}, "Group Buyers": {"Luxury Suite - Premium Date": 132146.59, "Education Credit Dugout Suite": 89604.84, "LFP": 72393.75, "Pepsi Party Deck Group": 55738.13, "Coterie Suite - Premium Date": 48462.77, "City Federal Party Deck": 43962.28, "Group Tickets- Tax Exempt": 37226.31, "Luxury Suite": 37091.04, "STEAM Day Group": 31992.0, "10 Game EDUCU Dugout Club Pckg": 23040.0, "FBSW - RFP": 22484.3, "Overflow Patio": 20846.07, "Coterie Suite": 14405.0, "5 Game Luxury Suite Pckg": 11700.0, "5 Game Coterie Suite Pckg": 10601.0, "5 Game EDUCU Dugout Club Pckg": 9360.0, "CF Party Deck- Tax Exempt": 8288.75, "Pepsi Party Deck- Tax Exempt": 5093.75, "Fundraiser - Zone D": 4244.01, "Coterie Suite- Tax Exempt": 3915.0}, "Single Buyers": {"Adult - Advanced": 152243.44, "Adult - Day of Game": 71717.25, "$16 Voucher": 19312.0, "Child - Advanced": 17289.78, "Senior - Advanced": 8233.25, "Child - Day of Game": 7073.0, "Military - Advanced": 5728.79, "Sod Pup Club": 5376.0, "MLB Promotional Offer": 2840.0, "Military - Day of Game": 2292.88, "Senior - Day of Game": 2290.0, "$2 Tuesday": 1944.0, "Dugout Suite Day of Game": 1650.0, "Themed Night Package": 1413.5, "Luxury Suite - Single Game": 195.0, "Community Voucher": 98.5, "Seat Upgrade": 71.5, "Full Season Pre-Sale": 29.5, "Promotional Package": 24.0, "Past Game Unused": 20.0}}}, "rev_by_zip": {"2023": {"79109": 391766.95, "79119": 325633.44, "79101": 209321.86, "79118": 208080.78, "79106": 204991.91, "79124": 152700.62, "79015": 145321.99, "79105": 109843.91, "79110": 109830.9, "79029": 103362.73}, "2024": {"79109": 392212.48, "79119": 302854.31, "79101": 211919.27, "79106": 192411.84, "79118": 190360.15, "79015": 147222.65, "79124": 143286.92, "79110": 108147.85, "79105": 99677.07, "79121": 82086.45}, "2025": {"79109": 370143.17, "79119": 319066.71, "79101": 229917.04, "79106": 194153.84, "79118": 191579.55, "79124": 149078.05, "79015": 130085.47, "79110": 104131.13, "79102": 86455.91, "79121": 83844.87}, "2026": {"79109": 304564.8, "79119": 252138.26, "79106": 166598.91, "79101": 163745.09, "79118": 161910.57, "79124": 152146.77, "79015": 102941.06, "79110": 90819.85, "79102": 86897.96, "79105": 84439.85}}, "dow_by_type_season": {"2023": {"Package Buyers": {"all": {"Monday": 340, "Tuesday": 160, "Wednesday": 168, "Thursday": 298, "Friday": 159, "Saturday": 29, "Sunday": 6}, "advance": {"Monday": 339, "Tuesday": 160, "Wednesday": 168, "Thursday": 298, "Friday": 159, "Saturday": 29, "Sunday": 6}, "walkup": {"Monday": 1, "Tuesday": 0, "Wednesday": 0, "Thursday": 0, "Friday": 0, "Saturday": 0, "Sunday": 0}}, "Group Buyers": {"all": {"Monday": 170, "Tuesday": 231, "Wednesday": 215, "Thursday": 265, "Friday": 176, "Saturday": 77, "Sunday": 19}, "advance": {"Monday": 167, "Tuesday": 214, "Wednesday": 198, "Thursday": 260, "Friday": 164, "Saturday": 66, "Sunday": 11}, "walkup": {"Monday": 3, "Tuesday": 17, "Wednesday": 17, "Thursday": 5, "Friday": 12, "Saturday": 11, "Sunday": 8}}, "Single Buyers": {"all": {"Monday": 1596, "Tuesday": 2529, "Wednesday": 2243, "Thursday": 3326, "Friday": 3486, "Saturday": 3528, "Sunday": 2529}, "advance": {"Monday": 1083, "Tuesday": 1317, "Wednesday": 1237, "Thursday": 1402, "Friday": 1349, "Saturday": 867, "Sunday": 738}, "walkup": {"Monday": 513, "Tuesday": 1212, "Wednesday": 1006, "Thursday": 1924, "Friday": 2137, "Saturday": 2661, "Sunday": 1791}}}, "2024": {"Package Buyers": {"all": {"Monday": 466, "Tuesday": 247, "Wednesday": 99, "Thursday": 189, "Friday": 108, "Saturday": 14, "Sunday": 4}, "advance": {"Monday": 466, "Tuesday": 247, "Wednesday": 99, "Thursday": 186, "Friday": 107, "Saturday": 14, "Sunday": 4}, "walkup": {"Monday": 0, "Tuesday": 0, "Wednesday": 0, "Thursday": 3, "Friday": 1, "Saturday": 0, "Sunday": 0}}, "Group Buyers": {"all": {"Monday": 128, "Tuesday": 273, "Wednesday": 296, "Thursday": 193, "Friday": 215, "Saturday": 79, "Sunday": 25}, "advance": {"Monday": 128, "Tuesday": 267, "Wednesday": 286, "Thursday": 181, "Friday": 212, "Saturday": 70, "Sunday": 22}, "walkup": {"Monday": 0, "Tuesday": 6, "Wednesday": 10, "Thursday": 12, "Friday": 3, "Saturday": 9, "Sunday": 3}}, "Single Buyers": {"all": {"Monday": 1218, "Tuesday": 2642, "Wednesday": 2311, "Thursday": 2740, "Friday": 3538, "Saturday": 3187, "Sunday": 2300}, "advance": {"Monday": 1022, "Tuesday": 1268, "Wednesday": 1163, "Thursday": 1423, "Friday": 1253, "Saturday": 792, "Sunday": 702}, "walkup": {"Monday": 196, "Tuesday": 1374, "Wednesday": 1148, "Thursday": 1317, "Friday": 2285, "Saturday": 2395, "Sunday": 1598}}}, "2025": {"Package Buyers": {"all": {"Monday": 216, "Tuesday": 259, "Wednesday": 201, "Thursday": 237, "Friday": 151, "Saturday": 10, "Sunday": 7}, "advance": {"Monday": 216, "Tuesday": 259, "Wednesday": 201, "Thursday": 236, "Friday": 151, "Saturday": 9, "Sunday": 7}, "walkup": {"Monday": 0, "Tuesday": 0, "Wednesday": 0, "Thursday": 1, "Friday": 0, "Saturday": 1, "Sunday": 0}}, "Group Buyers": {"all": {"Monday": 214, "Tuesday": 279, "Wednesday": 238, "Thursday": 291, "Friday": 257, "Saturday": 109, "Sunday": 44}, "advance": {"Monday": 211, "Tuesday": 271, "Wednesday": 225, "Thursday": 281, "Friday": 235, "Saturday": 75, "Sunday": 40}, "walkup": {"Monday": 3, "Tuesday": 8, "Wednesday": 13, "Thursday": 10, "Friday": 22, "Saturday": 34, "Sunday": 4}}, "Single Buyers": {"all": {"Monday": 941, "Tuesday": 2299, "Wednesday": 2092, "Thursday": 2738, "Friday": 3220, "Saturday": 3290, "Sunday": 2215}, "advance": {"Monday": 906, "Tuesday": 1061, "Wednesday": 1107, "Thursday": 1163, "Friday": 1054, "Saturday": 629, "Sunday": 571}, "walkup": {"Monday": 35, "Tuesday": 1238, "Wednesday": 985, "Thursday": 1575, "Friday": 2166, "Saturday": 2661, "Sunday": 1644}}}, "2026": {"Package Buyers": {"all": {"Monday": 87, "Tuesday": 95, "Wednesday": 106, "Thursday": 622, "Friday": 79, "Saturday": 12, "Sunday": 5}, "advance": {"Monday": 87, "Tuesday": 94, "Wednesday": 106, "Thursday": 622, "Friday": 79, "Saturday": 12, "Sunday": 5}, "walkup": {"Monday": 0, "Tuesday": 1, "Wednesday": 0, "Thursday": 0, "Friday": 0, "Saturday": 0, "Sunday": 0}}, "Group Buyers": {"all": {"Monday": 161, "Tuesday": 221, "Wednesday": 194, "Thursday": 188, "Friday": 165, "Saturday": 39, "Sunday": 16}, "advance": {"Monday": 161, "Tuesday": 209, "Wednesday": 192, "Thursday": 188, "Friday": 163, "Saturday": 36, "Sunday": 15}, "walkup": {"Monday": 0, "Tuesday": 12, "Wednesday": 2, "Thursday": 0, "Friday": 2, "Saturday": 3, "Sunday": 1}}, "Single Buyers": {"all": {"Monday": 365, "Tuesday": 744, "Wednesday": 723, "Thursday": 919, "Friday": 1121, "Saturday": 1007, "Sunday": 590}, "advance": {"Monday": 353, "Tuesday": 453, "Wednesday": 411, "Thursday": 540, "Friday": 395, "Saturday": 275, "Sunday": 244}, "walkup": {"Monday": 12, "Tuesday": 291, "Wednesday": 312, "Thursday": 379, "Friday": 726, "Saturday": 732, "Sunday": 346}}}}, "walkup_by_season": {"2023": {"total": 19237, "walkups": 11244, "pct": 58.4}, "2024": {"total": 17936, "walkups": 10313, "pct": 57.5}, "2025": {"total": 16795, "walkups": 10304, "pct": 61.4}, "2026": {"total": 5469, "walkups": 2798, "pct": 51.2}}, "walkup_dow_by_season": {"2023": {"Monday": 479, "Tuesday": 1231, "Wednesday": 984, "Thursday": 1897, "Friday": 2115, "Saturday": 2584, "Sunday": 1954}, "2024": {"Monday": 104, "Tuesday": 1402, "Wednesday": 1159, "Thursday": 1235, "Friday": 2249, "Saturday": 2381, "Sunday": 1783}, "2025": {"Monday": 0, "Tuesday": 1243, "Wednesday": 968, "Thursday": 1492, "Friday": 2150, "Saturday": 2586, "Sunday": 1865}, "2026": {"Monday": 0, "Tuesday": 274, "Wednesday": 327, "Thursday": 340, "Friday": 733, "Saturday": 705, "Sunday": 419}}, "retention_summary": {"2023": {"Buyer": 9851}, "2024": {"Returning": 3202, "New": 6348, "Lapsed": 6649, "Won Back": 0}, "2025": {"Returning": 3017, "New": 5708, "Lapsed": 6533, "Won Back": 696}, "2026": {"Returning": 1953, "New": 2437, "Lapsed": 7468, "Won Back": 302}}, "lead_time_by_type_season": {"2023": {"Package Buyers": {"Same Day": {"count": 1, "pct": 0.1}, "1-7 Days": {"count": 2, "pct": 0.2}, "8-30 Days": {"count": 8, "pct": 0.7}, "31-90 Days": {"count": 83, "pct": 7.2}, "90+ Days": {"count": 1066, "pct": 91.9}}, "Group Buyers": {"Same Day": {"count": 73, "pct": 6.3}, "1-7 Days": {"count": 191, "pct": 16.6}, "8-30 Days": {"count": 234, "pct": 20.3}, "31-90 Days": {"count": 294, "pct": 25.5}, "90+ Days": {"count": 361, "pct": 31.3}}, "Single Buyers": {"Same Day": {"count": 11244, "pct": 58.4}, "1-7 Days": {"count": 4847, "pct": 25.2}, "8-30 Days": {"count": 2184, "pct": 11.4}, "31-90 Days": {"count": 770, "pct": 4.0}, "90+ Days": {"count": 192, "pct": 1.0}}}, "2024": {"Package Buyers": {"Same Day": {"count": 4, "pct": 0.4}, "1-7 Days": {"count": 5, "pct": 0.4}, "8-30 Days": {"count": 4, "pct": 0.4}, "31-90 Days": {"count": 69, "pct": 6.1}, "90+ Days": {"count": 1045, "pct": 92.7}}, "Group Buyers": {"Same Day": {"count": 43, "pct": 3.6}, "1-7 Days": {"count": 206, "pct": 17.0}, "8-30 Days": {"count": 291, "pct": 24.1}, "31-90 Days": {"count": 298, "pct": 24.6}, "90+ Days": {"count": 371, "pct": 30.7}}, "Single Buyers": {"Same Day": {"count": 10313, "pct": 57.5}, "1-7 Days": {"count": 4652, "pct": 25.9}, "8-30 Days": {"count": 2001, "pct": 11.2}, "31-90 Days": {"count": 807, "pct": 4.5}, "90+ Days": {"count": 163, "pct": 0.9}}}, "2025": {"Package Buyers": {"Same Day": {"count": 2, "pct": 0.2}, "1-7 Days": {"count": 6, "pct": 0.6}, "8-30 Days": {"count": 31, "pct": 2.9}, "31-90 Days": {"count": 82, "pct": 7.6}, "90+ Days": {"count": 960, "pct": 88.8}}, "Group Buyers": {"Same Day": {"count": 94, "pct": 6.6}, "1-7 Days": {"count": 359, "pct": 25.1}, "8-30 Days": {"count": 335, "pct": 23.4}, "31-90 Days": {"count": 291, "pct": 20.3}, "90+ Days": {"count": 353, "pct": 24.7}}, "Single Buyers": {"Same Day": {"count": 10304, "pct": 61.4}, "1-7 Days": {"count": 3826, "pct": 22.8}, "8-30 Days": {"count": 1717, "pct": 10.2}, "31-90 Days": {"count": 689, "pct": 4.1}, "90+ Days": {"count": 259, "pct": 1.5}}}, "2026": {"Package Buyers": {"Same Day": {"count": 1, "pct": 0.1}, "1-7 Days": {"count": 2, "pct": 0.2}, "8-30 Days": {"count": 7, "pct": 0.7}, "31-90 Days": {"count": 39, "pct": 3.9}, "90+ Days": {"count": 957, "pct": 95.1}}, "Group Buyers": {"Same Day": {"count": 20, "pct": 2.0}, "1-7 Days": {"count": 93, "pct": 9.5}, "8-30 Days": {"count": 99, "pct": 10.1}, "31-90 Days": {"count": 284, "pct": 28.9}, "90+ Days": {"count": 488, "pct": 49.6}}, "Single Buyers": {"Same Day": {"count": 2798, "pct": 51.2}, "1-7 Days": {"count": 1133, "pct": 20.7}, "8-30 Days": {"count": 789, "pct": 14.4}, "31-90 Days": {"count": 482, "pct": 8.8}, "90+ Days": {"count": 267, "pct": 4.9}}}}, "repeat_buyers": {"2023": {"total": 8292, "repeat": 1962, "pct": 23.7}, "2024": {"total": 7920, "repeat": 1752, "pct": 22.1}, "2025": {"total": 7623, "repeat": 1596, "pct": 20.9}, "2026": {"total": 3187, "repeat": 548, "pct": 17.2}}, "avg_tickets": {"2023": {"Package Buyers": 170.2, "Group Buyers": 55.5, "Single Buyers": 2.9}, "2024": {"Package Buyers": 167.6, "Group Buyers": 51.4, "Single Buyers": 2.9}, "2025": {"Package Buyers": 161.7, "Group Buyers": 44.1, "Single Buyers": 3.0}, "2026": {"Package Buyers": 169.9, "Group Buyers": 61.2, "Single Buyers": 3.1}}, "pkg_product_trend": {"2023": {"Full Season": 1181313.71, "Half Season": 319444.8, "Other": 21114.76, "Partial Season": 178558.15, "Sponsor": 68401.63}, "2024": {"Full Season": 1131931.76, "Half Season": 331266.53, "Other": 15670.27, "Partial Season": 172350.08, "Sponsor": 53549.6}, "2025": {"Full Season": 1123452.27, "Half Season": 299527.95, "Other": 22165.61, "Partial Season": 171852.33, "Sponsor": 29934.07}, "2026": {"Full Season": 1117836.93, "Half Season": 259729.74, "Other": 28301.47, "Partial Season": 158018.21, "Sponsor": 34256.87}}, "grp_product_trend": {"2023": {"Education Credit Dugout Suite": 130899.0, "LFP": 100880.0, "Pepsi Party Deck Group": 57631.5, "Coterie Suite - Premium Date": 54371.0, "Luxury Suite": 38815.0, "Luxury Suite - Premium Date": 35326.0, "FBSW - RFP": 34531.0, "10 Game Luxury Suite Pckg": 33404.0, "Coterie Suite": 31828.0, "5 Game EDUCU Dugout Club Pckg": 29962.08}, "2024": {"Education Credit Dugout Suite": 116875.66, "LFP": 81116.13, "Group Tickets- Tax Exempt": 71876.0, "Pepsi Party Deck Group": 71762.82, "City Federal Party Deck": 64048.0, "Coterie Suite - Premium Date": 54944.51, "Luxury Suite - Premium Date": 44025.28, "Luxury Suite": 41632.09, "Coterie Suite": 32653.0, "10 Game EDUCU Dugout Club Pckg": 21920.0}, "2025": {"Education Credit Dugout Suite": 121821.01, "City Federal Party Deck": 86827.7, "LFP": 76787.09, "Group Tickets- Tax Exempt": 66646.0, "Pepsi Party Deck Group": 56009.42, "Coterie Suite - Premium Date": 51342.0, "Luxury Suite": 47592.83, "Luxury Suite - Premium Date": 46334.86, "Coterie Suite": 31504.0, "10 Game EDUCU Dugout Club Pckg": 27400.0}, "2026": {"Luxury Suite - Premium Date": 132146.59, "Education Credit Dugout Suite": 89604.84, "LFP": 72393.75, "Pepsi Party Deck Group": 55738.13, "Coterie Suite - Premium Date": 48462.77, "City Federal Party Deck": 43962.28, "Group Tickets- Tax Exempt": 37226.31, "Luxury Suite": 37091.04, "STEAM Day Group": 31992.0, "10 Game EDUCU Dugout Club Pckg": 23040.0}}, "new_vs_returning_single": {"2023": {"new": 8293, "returning": 0}, "2024": {"new": 6005, "returning": 1916}, "2025": {"new": 5215, "returning": 2409}, "2026": {"new": 2015, "returning": 1173}}};
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const SEASONS = ['2023','2024','2025','2026'];
+const BT = ['Package Buyers','Group Buyers','Single Buyers'];
+const DOW_ALL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const DOW_HOME = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const LEAD = ['Same Day','1-7 Days','8-30 Days','31-90 Days','90+ Days'];
+const BLUE = '#003087', RED = '#C8102E', BLUE2 = '#1a5cb8', BLUE3 = '#4a85d4', GRAY = '#9ca3af';
+const TYPE_C = {'Package Buyers': BLUE, 'Group Buyers': RED, 'Single Buyers': BLUE2};
+const LEAD_C = [RED, '#e05a1a', BLUE, BLUE2, BLUE3];
+const PKG_C = {
+  'Full Season': BLUE, 'Half Season': BLUE2, 'Partial Season': BLUE3,
+  'Sponsor': '#6b9fd4', 'Other': GRAY
+};
+
+let currentSeason = 'all';
+let currentPage = 'overview';
+const charts = {};
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const fmt$ = v => '$' + Number(v).toLocaleString('en-US', {maximumFractionDigits:0});
+const fmtN = v => Number(v).toLocaleString('en-US');
+const pct = (a,b) => b === 0 ? 0 : Math.round((a-b)/b*100);
+const arrow = v => v > 0 ? '▲' : v < 0 ? '▼' : '—';
+const deltaClass = v => v > 0 ? 'delta-up' : v < 0 ? 'delta-down' : 'delta-flat';
+
+function getSeasons() { return currentSeason === 'all' ? SEASONS : [currentSeason]; }
+
+function aggRevByType(seasons, type) {
+  return seasons.reduce((s,ss) => s + (D.rev_by_type[ss][type]||0), 0);
+}
+
+function aggZIP(seasons) {
+  const r = {};
+  seasons.forEach(s => Object.entries(D.rev_by_zip[s]).forEach(([k,v]) => r[k]=(r[k]||0)+v));
+  return Object.entries(r).sort((a,b)=>b[1]-a[1]).slice(0,10);
+}
+
+function aggDOW(seasons, type, filter) {
+  const r = {};
+  DOW_ALL.forEach(d => r[d]=0);
+  seasons.forEach(s => DOW_ALL.forEach(d => r[d] += D.dow_by_type_season[s][type][filter][d]||0));
+  return r;
+}
+
+function aggLead(seasons, type) {
+  const r = {};
+  LEAD.forEach(b => r[b]=0);
+  seasons.forEach(s => LEAD.forEach(b => r[b] += D.lead_time_by_type_season[s][type][b].pct||0));
+  LEAD.forEach(b => r[b] = Math.round(r[b]/seasons.length*10)/10);
+  return r;
+}
+
+function aggProds(seasons, type) {
+  const r = {};
+  seasons.forEach(s => Object.entries(D.top_products_by_type_season[s][type]).forEach(([k,v])=>r[k]=(r[k]||0)+v));
+  return Object.entries(r).sort((a,b)=>b[1]-a[1]);
+}
+
+function destroyChart(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#6b7280';
+Chart.defaults.plugins.legend.labels.boxWidth = 8;
+Chart.defaults.plugins.legend.labels.padding = 12;
+
+function baseOpts(extra={}) {
+  return {
+    responsive: true, maintainAspectRatio: true,
+    plugins: { legend: { display: false }, tooltip: {} },
+    ...extra
+  };
+}
+
+function labelPlugin(fmt) {
+  return {
+    id: 'labelPlugin',
+    afterDatasetsDraw(chart) {
+      const ctx = chart.ctx;
+      chart.data.datasets.forEach((ds, di) => {
+        chart.getDatasetMeta(di).data.forEach((bar, i) => {
+          const val = ds.data[i];
+          if (!val && val !== 0) return;
+          ctx.save();
+          ctx.fillStyle = '#374151';
+          ctx.font = '500 10px DM Sans';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          const x = bar.x + 4;
+          const y = bar.y;
+          ctx.fillText(fmt ? fmt(val) : val, x, y);
+          ctx.restore();
+        });
+      });
+    }
+  };
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function showPage(page) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick').includes("'"+page+"'")) n.classList.add('active');
+  });
+  const titles = {overview:'Overview',single:'Single Buyers',package:'Package Buyers',group:'Group Buyers'};
+  document.getElementById('pageTitle').textContent = titles[page];
+  renderPage(page);
+}
+
+function setSeason(val) {
+  currentSeason = val;
+  document.getElementById('seasonBadge').textContent = val === 'all' ? 'All Seasons' : val + ' Season';
+  renderPage(currentPage);
+}
+
+function renderPage(p) {
+  if(p==='overview') renderOverview();
+  else if(p==='single') renderSingle();
+  else if(p==='package') renderPackage();
+  else if(p==='group') renderGroup();
+}
+
+// ── DOW TOGGLE ────────────────────────────────────────────────────────────────
+function setDOWFilter(page, filter, btn) {
+  btn.closest('.toggle-group').querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const seasons = getSeasons();
+  const type = page==='single'?'Single Buyers':page==='package'?'Package Buyers':'Group Buyers';
+  const chartId = 'chart-'+page+'-dow';
+
+  let dowData;
+  // For single walkup, use walkup_dow_by_season which uses GAME_DOW
+  // so it matches the dedicated Walkup Purchases by Game Day chart
+  if(page === 'single' && filter === 'walkup') {
+    const wDow = {};
+    DOW_ALL.forEach(d=>wDow[d]=0);
+    seasons.forEach(s=>DOW_ALL.forEach(d=>wDow[d]+=(D.walkup_dow_by_season[s][d]||0)));
+    dowData = DOW_ALL.map(d=>wDow[d]);
+  } else {
+    const dow = aggDOW(seasons, type, filter);
+    dowData = DOW_ALL.map(d=>dow[d]);
+  }
+
+  if(charts[chartId]) {
+    charts[chartId].data.labels = DOW_ALL;
+    charts[chartId].data.datasets[0].data = dowData;
+    charts[chartId].update();
+  }
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────────────
+function renderOverview() {
+  const seasons = getSeasons();
+
+  // Banner
+  const r2026 = D.kpi_at_cutoff['2026'].revenue;
+  const r2025 = D.kpi_at_cutoff['2025'].revenue;
+  const diff = pct(r2026, r2025);
+  document.getElementById('banner-rev-2026').textContent = fmt$(r2026);
+  document.getElementById('banner-vs-2025').textContent = (diff>=0?'+':'')+diff+'% vs 2025';
+
+  // KPIs
+  const totalRev = seasons.reduce((a,s)=>a+D.kpi_by_season[s].revenue,0);
+  const totalTickets = seasons.reduce((a,s)=>a+D.kpi_by_season[s].tickets,0);
+  const totalTx = seasons.reduce((a,s)=>a+D.kpi_by_season[s].transactions,0);
+  const avgSpend = totalRev/totalTx;
+  const revByTypeTotals = BT.map(bt => ({
+    type: bt,
+    revenue: seasons.reduce((a,s)=>a+D.rev_by_type[s][bt],0)
+  }));
+  const revTypeTotal = revByTypeTotals.reduce((a,d)=>a+d.revenue,0);
+  const topRevType = revByTypeTotals.reduce((top,d)=>d.revenue > top.revenue ? d : top, revByTypeTotals[0]);
+  const topRevShare = Math.round(topRevType.revenue / revTypeTotal * 100);
+
+  const rev2026c = D.kpi_at_cutoff['2026'].revenue;
+  const rev2025c = D.kpi_at_cutoff['2025'].revenue;
+  const revDelta = pct(rev2026c, rev2025c);
+
+  const singleRev = seasons.reduce((a,s)=>a+D.rev_by_type[s]['Single Buyers'],0);
+  const packageRev = seasons.reduce((a,s)=>a+D.rev_by_type[s]['Package Buyers'],0);
+  const groupRev = seasons.reduce((a,s)=>a+D.rev_by_type[s]['Group Buyers'],0);
+
+  document.getElementById('overview-kpis').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value">${fmt$(totalRev)}</div>
+      <div class="kpi-sub">${seasons.length>1?'Across '+seasons.join(', '):'Season '+seasons[0]}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Single Buyer Revenue</div>
+      <div class="kpi-value">${fmt$(singleRev)}</div>
+      <div class="kpi-sub">${Math.round(singleRev/totalRev*100)}% of total revenue</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Package Buyer Revenue</div>
+      <div class="kpi-value">${fmt$(packageRev)}</div>
+      <div class="kpi-sub">${Math.round(packageRev/totalRev*100)}% of total revenue</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Group Buyer Revenue</div>
+      <div class="kpi-value">${fmt$(groupRev)}</div>
+      <div class="kpi-sub">${Math.round(groupRev/totalRev*100)}% of total revenue</div>
+    </div>
+  `;
+
+  // Insights
+  const pkgDelta = pct(D.pkg_product_trend['2026']['Full Season'], D.pkg_product_trend['2023']['Full Season']);
+  const hsDelta = pct(D.pkg_product_trend['2026']['Half Season'], D.pkg_product_trend['2023']['Half Season']);
+  const retRate = Math.round(D.retention_summary['2025'].Returning / (D.retention_summary['2024'].Returning + D.retention_summary['2024'].New + (D.retention_summary['2024']['Won Back']||0)) * 100);
+  const repeatDrop = D.repeat_buyers['2026'].pct - D.repeat_buyers['2023'].pct;
+
+
+  // Revenue by season
+  destroyChart('rev-season');
+  charts['rev-season'] = new Chart(document.getElementById('chart-rev-season'), {
+    type: 'bar',
+    data: {
+      labels: SEASONS,
+      datasets: [{
+        data: SEASONS.map(s => D.kpi_by_season[s].revenue),
+        backgroundColor: SEASONS.map(s => seasons.includes(s) ? BLUE : '#e5e7eb'),
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      ...baseOpts(),
+      scales: {
+        y: { ticks: { callback: v => '$'+(v/1000000).toFixed(1)+'M' }, grid: { color: '#f3f4f6' }, border: { display: false } },
+        x: { grid: { display: false }, border: { display: false } }
+      },
+      plugins: { ...baseOpts().plugins, tooltip: { callbacks: { label: ctx => fmt$(ctx.raw) } } }
+    }
+  });
+
+  // Rev by type at cutoff
+  destroyChart('rev-type-cutoff');
+  charts['rev-type-cutoff'] = new Chart(document.getElementById('chart-rev-type-cutoff'), {
+    type: 'bar',
+    data: {
+      labels: SEASONS,
+      datasets: BT.map(bt => ({
+        label: bt,
+        data: SEASONS.map(s => D.rev_by_type_cutoff[s][bt]),
+        backgroundColor: TYPE_C[bt],
+        borderRadius: 0,
+      }))
+    },
+    options: {
+      ...baseOpts(),
+      plugins: { legend: { display: true, position: 'bottom' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label+': '+fmt$(ctx.raw) } } },
+      scales: {
+        y: { stacked: true, ticks: { callback: v => '$'+(v/1000000).toFixed(1)+'M' }, grid: { color: '#f3f4f6' }, border: { display: false } },
+        x: { stacked: true, grid: { display: false }, border: { display: false } }
+      }
+    }
+  });
+
+  // Revenue share by buyer type
+  destroyChart('rev-share-type');
+  charts['rev-share-type'] = new Chart(document.getElementById('chart-rev-share-type'), {
+    type: 'doughnut',
+    data: {
+      labels: BT,
+      datasets: [{
+        data: BT.map(bt => seasons.reduce((a,s)=>a+D.rev_by_type[s][bt],0)),
+        backgroundColor: BT.map(bt => TYPE_C[bt]),
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: ctx => ctx.label+': '+fmt$(ctx.raw)+' ('+Math.round(ctx.raw/ctx.dataset.data.reduce((a,b)=>a+b,0)*100)+'%)' } }
+      }
+    }
+  });
+
+  // Pace table
+  const paceRows = BT.map(bt => {
+    const vals = SEASONS.map(s => D.rev_by_type_cutoff[s][bt]);
+    const d = pct(vals[3], vals[2]);
+    const colorClass = d > 0 ? 'delta-up' : d < 0 ? 'delta-down' : 'delta-flat';
+    return `<div class="pace-row">
+      <div class="pace-type">${bt.replace(' Buyers','')}</div>
+      ${vals.slice(0,3).map(v=>`<div class="pace-val">${fmt$(v)}</div>`).join('')}
+      <div class="pace-val" style="font-weight:800">${fmt$(vals[3])} <span class="kpi-delta ${colorClass}" style="font-size:10px;padding:2px 6px">${arrow(d)}${Math.abs(d)}%</span></div>
+    </div>`;
+  }).join('');
+  document.getElementById('pace-table').innerHTML = paceRows;
+  // Show/hide pace section based on season filter
+  const paceSection = document.getElementById('pace-section-overview');
+  if(paceSection) paceSection.style.display = currentSeason === '2026' || currentSeason === 'all' ? 'block' : 'none';
+
+  // ZIP
+  destroyChart('zip');
+  const zipData = aggZIP(seasons);
+  charts['zip'] = new Chart(document.getElementById('chart-zip'), {
+    type: 'bar',
+    data: {
+      labels: zipData.map(([k])=>k),
+      datasets: [{ data: zipData.map(([,v])=>v), backgroundColor: BLUE, borderRadius: 4 }]
+    },
+    options: {
+      ...baseOpts({ indexAxis: 'y' }),
+      scales: {
+        x: { ticks: { callback: v => '$'+(v/1000).toFixed(0)+'K' }, grid: { color: '#f3f4f6' }, border: { display: false } },
+        y: { grid: { display: false }, border: { display: false } }
+      },
+      plugins: { ...baseOpts().plugins, tooltip: { callbacks: { label: ctx => fmt$(ctx.raw) } } }
+    }
+  });
+
+  // Revenue trend line chart
+  destroyChart('rev-trend');
+  const trendSeasons = ['2023','2024','2025','2026'];
+  const trendColors = [BLUE2, BLUE3, '#6b9fd4', RED];
+  const maxWeek = 34; // Show up to 35 weeks
+  // Build consistent week labels 0 to maxWeek
+  const weekLabels = Array.from({length: maxWeek + 1}, (_, i) => 'Wk ' + (i + 1));
+  charts['rev-trend'] = new Chart(document.getElementById('chart-rev-trend'), {
+    type: 'line',
+    data: {
+      labels: weekLabels,
+      datasets: trendSeasons.map((s, i) => {
+        const data = Array.from({length: maxWeek + 1}, (_, w) => {
+          const val = TREND[s][String(w)];
+          return val !== undefined ? val : null;
+        });
+        return {
+          label: s === '2026' ? '2026 (through May 28)' : s,
+          data: data,
+          borderColor: trendColors[i],
+          backgroundColor: 'transparent',
+          borderWidth: s === '2026' ? 3 : 1.5,
+          borderDash: s === '2026' ? [] : [],
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          tension: 0.3,
+          spanGaps: false,
+        };
+      })
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: true, position: 'bottom' },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt$(ctx.raw) }
+        }
+      },
+      scales: {
+        y: {
+          ticks: { callback: v => '$' + (v/1000000).toFixed(1) + 'M' },
+          grid: { color: '#f3f4f6' },
+          border: { display: false }
+        },
+        x: { grid: { display: false }, border: { display: false }, ticks: { maxTicksLimit: 12 }, min: 0, max: 34 }
+      }
+    }
+  });
+
+  // Retention detail
+  const retColors = { Buyer:'ret-buyer', Returning:'ret-returning', New:'ret-new', Lapsed:'ret-lapsed', 'Won Back':'ret-wonback' };
+  document.getElementById('retention-detail').innerHTML = SEASONS.map(s => {
+    const data = D.retention_summary[s];
+    const rows = Object.entries(data).map(([k,v]) =>
+      `<div class="ret-row"><span class="ret-label">${k}</span><span class="ret-val ${retColors[k]||''}">${fmtN(v)}</span></div>`
+    ).join('');
+    return `<div class="ret-cell"><div class="ret-season">${s}${s==='2026'?' · 30% Complete':''}</div>${rows}</div>`;
+  }).join('');
+}
+
+// ── SINGLE ────────────────────────────────────────────────────────────────────
+function renderSingle() {
+  const seasons = getSeasons();
+  const rev = seasons.reduce((a,s)=>a+D.rev_by_type[s]['Single Buyers'],0);
+  const tx = seasons.reduce((a,s)=>a+D.kpi_by_season[s].transactions,0);
+  const avgWalkup = Math.round(seasons.reduce((a,s)=>a+D.walkup_by_season[s].pct,0)/seasons.length*10)/10;
+  const revCutoff2026 = D.rev_by_type_cutoff['2026']['Single Buyers'];
+  const revCutoff2025 = D.rev_by_type_cutoff['2025']['Single Buyers'];
+  const revDelta = pct(revCutoff2026, revCutoff2025);
+
+    // Most popular walkup day and advance day
+  const walkupDow = {};
+  const advanceDow = {};
+  DOW_ALL.forEach(d=>{walkupDow[d]=0; advanceDow[d]=0;});
+  seasons.forEach(s=>{
+    DOW_ALL.forEach(d=>{
+      walkupDow[d]+=(D.walkup_dow_by_season[s][d]||0);
+      advanceDow[d]+=(D.dow_by_type_season[s]['Single Buyers']['advance'][d]||0);
+    });
+  });
+  const topWalkupDay = DOW_ALL.reduce((a,b)=>walkupDow[a]>=walkupDow[b]?a:b);
+  const topAdvanceDay = DOW_ALL.reduce((a,b)=>advanceDow[a]>=advanceDow[b]?a:b);
+
+  document.getElementById('single-kpis').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value">${fmt$(rev)}</div>
+      <div class="kpi-sub">Single buyer revenue</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Day-of-Game Purchase Rate</div>
+      <div class="kpi-value">${avgWalkup}%</div>
+      <div class="kpi-sub">Buy tickets on game day</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Most Popular Walkup Day</div>
+      <div class="kpi-value">${topWalkupDay}</div>
+      <div class="kpi-sub">${fmtN(walkupDow[topWalkupDay])} walkup purchases</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Most Popular Advance Day</div>
+      <div class="kpi-value">${topAdvanceDay}</div>
+      <div class="kpi-sub">${fmtN(advanceDow[topAdvanceDay])} advance purchases</div>
+    </div>
+  `;
+
+  const repeatDrop = D.repeat_buyers['2026'].pct - D.repeat_buyers['2023'].pct;
+
+  // Walkup %
+  destroyChart('walkup-pct');
+  charts['walkup-pct'] = new Chart(document.getElementById('chart-walkup-pct'), {
+    type: 'bar',
+    data: {
+      labels: SEASONS,
+      datasets: [{ data: SEASONS.map(s=>D.walkup_by_season[s].pct), backgroundColor: SEASONS.map(s=>seasons.includes(s)?RED:'#e5e7eb'), borderRadius: 5 }]
+    },
+    options: {
+      ...baseOpts(),
+      scales: {
+        y: { min:0, max:80, ticks:{callback:v=>v+'%'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      },
+      plugins: { ...baseOpts().plugins, tooltip: { callbacks: { label: ctx=>ctx.raw+'%' } } }
+    }
+  });
+
+  // Walkup DOW
+  destroyChart('walkup-dow');
+  const wDow = {};
+  DOW_ALL.forEach(d=>wDow[d]=0);
+  seasons.forEach(s=>DOW_ALL.forEach(d=>wDow[d]+=(D.walkup_dow_by_season[s][d]||0)));
+  charts['walkup-dow'] = new Chart(document.getElementById('chart-walkup-dow'), {
+    type: 'bar',
+    data: {
+      labels: DOW_ALL,
+      datasets: [{ data: DOW_ALL.map(d=>wDow[d]), backgroundColor: RED, borderRadius: 5 }]
+    },
+    options: {
+      ...baseOpts(),
+      scales: {
+        y: { ticks:{callback:v=>fmtN(v)}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // DOW
+  destroyChart('chart-single-dow');
+  const dow = aggDOW(seasons,'Single Buyers','all');
+  charts['chart-single-dow'] = new Chart(document.getElementById('chart-single-dow'), {
+    type: 'bar',
+    data: { labels: DOW_ALL, datasets: [{ data: DOW_ALL.map(d=>dow[d]), backgroundColor: BLUE, borderRadius: 5 }] },
+    options: {
+      ...baseOpts(),
+      scales: {
+        y: { ticks:{callback:v=>fmtN(v)}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // Lead time stacked horizontal
+  destroyChart('chart-single-lead');
+  const lead = SEASONS.map(s => LEAD.map(b => D.lead_time_by_type_season[s]['Single Buyers'][b].pct));
+  charts['chart-single-lead'] = new Chart(document.getElementById('chart-single-lead'), {
+    type: 'bar',
+    data: {
+      labels: LEAD,
+      datasets: seasons.map((s,i) => ({
+        label: s,
+        data: LEAD.map(b => D.lead_time_by_type_season[s]['Single Buyers'][b].pct),
+        backgroundColor: [BLUE, BLUE2, BLUE3, '#6b9fd4'][i] || '#9ca3af',
+        borderRadius: 4,
+      }))
+    },
+    options: {
+      ...baseOpts(),
+      plugins: { legend: { display: true, position: 'bottom' }, tooltip: { callbacks: { label: ctx=>ctx.dataset.label+': '+ctx.raw+'%' } } },
+      scales: {
+        y: { max:80, ticks:{callback:v=>v+'%'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // Products
+  const prods = aggProds(seasons,'Single Buyers');
+  const maxR = prods[0][1];
+  document.getElementById('single-products').innerHTML = buildTable(prods, maxR);
+
+  // ZIP
+  destroyChart('chart-single-zip');
+  renderZIP('chart-single-zip', seasons);
+
+  // New vs returning
+  destroyChart('chart-single-new-ret');
+  charts['chart-single-new-ret'] = new Chart(document.getElementById('chart-single-new-ret'), {
+    type: 'bar',
+    data: {
+      labels: ['2024','2025','2026'],
+      datasets: [
+        { label: 'New', data: ['2024','2025','2026'].map(s=>D.new_vs_returning_single[s].new), backgroundColor: BLUE2, borderRadius: 4 },
+        { label: 'Returning', data: ['2024','2025','2026'].map(s=>D.new_vs_returning_single[s].returning), backgroundColor: '#16a34a', borderRadius: 4 },
+      ]
+    },
+    options: {
+      ...baseOpts(),
+      plugins: { legend: { display: true, position: 'bottom' } },
+      scales: {
+        y: { grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // Repeat buyers
+  destroyChart('chart-repeat');
+  charts['chart-repeat'] = new Chart(document.getElementById('chart-repeat'), {
+    type: 'bar',
+    data: {
+      labels: SEASONS,
+      datasets: [{ label: 'Repeat Buyer %', data: SEASONS.map(s=>D.repeat_buyers[s].pct), backgroundColor: SEASONS.map(s=>seasons.includes(s)?BLUE:'#e5e7eb'), borderRadius: 5 }]
+    },
+    options: {
+      ...baseOpts(),
+      scales: {
+        y: { min:0, max:30, ticks:{callback:v=>v+'%'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      },
+      plugins: { ...baseOpts().plugins, tooltip: { callbacks: { label: ctx=>ctx.raw+'% of buyers purchased more than once' } } }
+    }
+  });
+
+  // Avg tickets
+  destroyChart('chart-single-avg-tickets');
+  charts['chart-single-avg-tickets'] = new Chart(document.getElementById('chart-single-avg-tickets'), {
+    type: 'line',
+    data: {
+      labels: SEASONS,
+      datasets: [{ data: SEASONS.map(s=>D.avg_tickets[s]['Single Buyers']), borderColor: BLUE, backgroundColor: 'rgba(0,48,135,0.06)', borderWidth:2, pointBackgroundColor:BLUE, pointRadius:5, fill:true, tension:0.3 }]
+    },
+    options: {
+      ...baseOpts(),
+      scales: {
+        y: { min:2, max:4, ticks:{callback:v=>v+' tickets'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // Pace
+  destroyChart('chart-single-pace');
+  renderPace('chart-single-pace','Single Buyers',seasons);
+}
+
+// ── PACKAGE ───────────────────────────────────────────────────────────────────
+function renderPackage() {
+  const seasons = getSeasons();
+  const rev = seasons.reduce((a,s)=>a+D.rev_by_type[s]['Package Buyers'],0);
+  const totalRev = seasons.reduce((a,s)=>a+D.kpi_by_season[s].revenue,0);
+  const revShare = Math.round(rev/totalRev*100);
+  const revC26 = D.rev_by_type_cutoff['2026']['Package Buyers'];
+  const revC25 = D.rev_by_type_cutoff['2025']['Package Buyers'];
+  const d = pct(revC26,revC25);
+
+    const topPkgType = Object.entries(D.pkg_product_trend[seasons[seasons.length-1]]).sort((a,b)=>b[1]-a[1])[0][0];
+  const pct90pkg = Math.round(seasons.reduce((a,s)=>a+D.lead_time_by_type_season[s]['Package Buyers']['90+ Days'].pct,0)/seasons.length);
+  document.getElementById('package-kpis').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value">${fmt$(rev)}</div>
+      <div class="kpi-sub">${revShare}% of total revenue</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Top Package Type</div>
+      <div class="kpi-value" style="font-size:18px">${topPkgType}</div>
+      <div class="kpi-sub">By revenue in selected season(s)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Purchase 90+ Days Early</div>
+      <div class="kpi-value">${pct90pkg}%</div>
+      <div class="kpi-sub">Avg across selected seasons</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Avg Tickets / Transaction</div>
+      <div class="kpi-value">${D.avg_tickets['2026']['Package Buyers']}</div>
+      <div class="kpi-sub">2026 season</div>
+    </div>
+  `;
+
+  const hsDrop = pct(D.pkg_product_trend['2026']['Half Season'], D.pkg_product_trend['2023']['Half Season']);
+  const sponsorDrop = pct(D.pkg_product_trend['2026']['Sponsor'], D.pkg_product_trend['2023']['Sponsor']);
+
+  // Package type trend
+  destroyChart('chart-pkg-trend');
+  const pkgTypes = ['Full Season','Half Season','Partial Season','Sponsor'];
+  charts['chart-pkg-trend'] = new Chart(document.getElementById('chart-pkg-trend'), {
+    type: 'line',
+    data: {
+      labels: SEASONS,
+      datasets: pkgTypes.map(t => ({
+        label: t,
+        data: SEASONS.map(s=>D.pkg_product_trend[s][t]||0),
+        borderColor: PKG_C[t],
+        backgroundColor: 'transparent',
+        borderWidth: 2.5,
+        pointBackgroundColor: PKG_C[t],
+        pointRadius: 5,
+        tension: 0.3,
+      }))
+    },
+    options: {
+      ...baseOpts(),
+      plugins: { legend: { display: true, position: 'bottom' }, tooltip: { callbacks: { label: ctx=>ctx.dataset.label+': '+fmt$(ctx.raw) } } },
+      scales: {
+        y: { ticks:{callback:v=>'$'+(v/1000000).toFixed(2)+'M'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // DOW
+  destroyChart('chart-package-dow');
+  const dow = aggDOW(seasons,'Package Buyers','all');
+  charts['chart-package-dow'] = new Chart(document.getElementById('chart-package-dow'), {
+    type: 'bar',
+    data: { labels: DOW_ALL, datasets: [{ data: DOW_ALL.map(d=>dow[d]), backgroundColor: BLUE, borderRadius: 5 }] },
+    options: { ...baseOpts(), scales: { y:{ticks:{callback:v=>fmtN(v)},grid:{color:'#f3f4f6'},border:{display:false}}, x:{grid:{display:false},border:{display:false}} } }
+  });
+
+
+  // Products
+  const prods = aggProds(seasons,'Package Buyers');
+  document.getElementById('package-products').innerHTML = buildTable(prods, prods[0][1]);
+
+  // ZIP
+  destroyChart('chart-package-zip');
+  renderZIP('chart-package-zip', seasons);
+
+  // Pace
+  destroyChart('chart-package-pace');
+  renderPace('chart-package-pace','Package Buyers',seasons);
+}
+
+// ── GROUP ─────────────────────────────────────────────────────────────────────
+function renderGroup() {
+  const seasons = getSeasons();
+  const rev = seasons.reduce((a,s)=>a+D.rev_by_type[s]['Group Buyers'],0);
+  const totalRev = seasons.reduce((a,s)=>a+D.kpi_by_season[s].revenue,0);
+  const revC26 = D.rev_by_type_cutoff['2026']['Group Buyers'];
+  const revC25 = D.rev_by_type_cutoff['2025']['Group Buyers'];
+  const d = pct(revC26,revC25);
+
+    const totalRevGrp = seasons.reduce((a,s)=>a+D.kpi_by_season[s].revenue,0);
+  const avgGrpSize = D.avg_tickets[seasons[seasons.length-1]]['Group Buyers'];
+  const topGrpProd = Object.entries(D.grp_product_trend[seasons[seasons.length-1]]).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('group-kpis').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value">${fmt$(rev)}</div>
+      <div class="kpi-sub">${Math.round(rev/totalRevGrp*100)}% of total revenue</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Avg Group Size</div>
+      <div class="kpi-value">${avgGrpSize}</div>
+      <div class="kpi-sub">Avg tickets per group transaction</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Top Group Product</div>
+      <div class="kpi-value" style="font-size:14px">${topGrpProd[0]}</div>
+      <div class="kpi-sub">${fmt$(topGrpProd[1])} in selected season(s)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">2026 vs 2025 — Same Point</div>
+      <div class="kpi-value">${fmt$(revC26)}</div>
+      <span class="kpi-delta ${deltaClass(d)}">${arrow(d)} ${Math.abs(d)}% vs 2025</span>
+    </div>
+  `;
+
+  const lsGrowth = pct(D.grp_product_trend['2026']['Luxury Suite - Premium Date']||0, D.grp_product_trend['2023']['Luxury Suite - Premium Date']||0);
+
+  // DOW
+  destroyChart('chart-group-dow');
+  const dow = aggDOW(seasons,'Group Buyers','all');
+  charts['chart-group-dow'] = new Chart(document.getElementById('chart-group-dow'), {
+    type: 'bar',
+    data: { labels: DOW_ALL, datasets: [{ data: DOW_ALL.map(d=>dow[d]), backgroundColor: RED, borderRadius: 5 }] },
+    options: { ...baseOpts(), scales: { y:{ticks:{callback:v=>fmtN(v)},grid:{color:'#f3f4f6'},border:{display:false}}, x:{grid:{display:false},border:{display:false}} } }
+  });
+
+  // Lead
+  destroyChart('chart-group-lead');
+  charts['chart-group-lead'] = new Chart(document.getElementById('chart-group-lead'), {
+    type: 'bar',
+    data: {
+      labels: SEASONS,
+      datasets: LEAD.map((b,i) => ({
+        label: b,
+        data: SEASONS.map(s=>D.lead_time_by_type_season[s]['Group Buyers'][b].pct),
+        backgroundColor: LEAD_C[i],
+        borderRadius: i===LEAD.length-1?4:0,
+      }))
+    },
+    options: {
+      ...baseOpts({ indexAxis: 'y' }),
+      plugins: { legend:{display:true,position:'bottom'}, tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.raw+'%'}} },
+      scales: {
+        x: { stacked:true, max:100, ticks:{callback:v=>v+'%'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        y: { stacked:true, grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // Products
+  const prods = aggProds(seasons,'Group Buyers');
+  document.getElementById('group-products').innerHTML = buildTable(prods, prods[0][1]);
+
+  // ZIP
+  destroyChart('chart-group-zip');
+  renderZIP('chart-group-zip', seasons);
+
+  // Group product trend
+  destroyChart('chart-grp-trend');
+  const grpProds = Object.keys(D.grp_product_trend['2023']).slice(0,6);
+  const grpColors = [BLUE, RED, BLUE2, BLUE3, '#6b9fd4', '#e05a1a'];
+  // Limit to top 5 products by total revenue across all seasons for clarity
+  const allGrpTotals = {};
+  SEASONS.forEach(s => Object.entries(D.grp_product_trend[s]).forEach(([k,v])=>allGrpTotals[k]=(allGrpTotals[k]||0)+v));
+  const top5GrpProds = Object.entries(allGrpTotals).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k])=>k);
+  charts['chart-grp-trend'] = new Chart(document.getElementById('chart-grp-trend'), {
+    type: 'line',
+    data: {
+      labels: SEASONS,
+      datasets: top5GrpProds.map((p,i) => ({
+        label: p,
+        data: SEASONS.map(s=>D.grp_product_trend[s][p]||0),
+        borderColor: grpColors[i],
+        backgroundColor: 'transparent',
+        borderWidth: 2.5,
+        pointBackgroundColor: grpColors[i],
+        pointRadius: 5,
+        tension: 0.3,
+      }))
+    },
+    options: {
+      ...baseOpts(),
+      plugins: { legend:{display:true,position:'bottom'}, tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmt$(ctx.raw)}} },
+      scales: {
+        y: { ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // Avg tickets
+  destroyChart('chart-group-avg-tickets');
+  charts['chart-group-avg-tickets'] = new Chart(document.getElementById('chart-group-avg-tickets'), {
+    type: 'bar',
+    data: {
+      labels: SEASONS,
+      datasets: [{ data: SEASONS.map(s=>D.avg_tickets[s]['Group Buyers']), backgroundColor: SEASONS.map(s=>seasons.includes(s)?RED:'#e5e7eb'), borderRadius: 5 }]
+    },
+    options: {
+      ...baseOpts(),
+      scales: {
+        y: { ticks:{callback:v=>v+' tickets'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // Pace
+  destroyChart('chart-group-pace');
+  renderPace('chart-group-pace','Group Buyers',seasons);
+}
+
+// ── SHARED ────────────────────────────────────────────────────────────────────
+function buildTable(prods, maxR) {
+  const top10 = prods.slice(0, 10);
+  const rest = prods.slice(10);
+  const tableId = 'tbl_' + Math.random().toString(36).substr(2,6);
+  const restRows = rest.length > 0 ? `
+    <tr id="${tableId}-toggle" style="cursor:pointer;background:var(--surface2)" onclick="
+      const rows = document.getElementById('${tableId}-rest');
+      const btn = document.getElementById('${tableId}-btn');
+      if(rows.style.display==='none'){rows.style.display='';btn.textContent='Show less ▲';}
+      else{rows.style.display='none';btn.textContent='Show ${rest.length} more ▼';}
+    ">
+      <td colspan="2" style="text-align:center;font-size:11px;font-weight:600;color:var(--text-secondary);padding:8px">
+        <span id="${tableId}-btn">Show ${rest.length} more ▼</span>
+      </td>
+    </tr>
+    <tbody id="${tableId}-rest" style="display:none">
+      ${rest.map(([name,rev])=>`
+        <tr>
+          <td>${name}</td>
+          <td class="num">
+            <div class="rev-bar-cell">
+              <div class="rev-bar" style="width:${Math.round(rev/maxR*80)}px"></div>
+              ${fmt$(rev)}
+            </div>
+          </td>
+        </tr>`).join('')}
+    </tbody>` : '';
+  return `<table class="tbl">
+    <thead><tr><th>Product</th><th class="num">Revenue</th></tr></thead>
+    <tbody>
+      ${top10.map(([name,rev])=>`
+        <tr>
+          <td>${name}</td>
+          <td class="num">
+            <div class="rev-bar-cell">
+              <div class="rev-bar" style="width:${Math.round(rev/maxR*80)}px"></div>
+              ${fmt$(rev)}
+            </div>
+          </td>
+        </tr>`).join('')}
+    </tbody>
+    ${restRows}
+  </table>`;
+}
+
+function renderZIP(id, seasons) {
+  const zipData = aggZIP(seasons);
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: {
+      labels: zipData.map(([k])=>k),
+      datasets: [{ data: zipData.map(([,v])=>v), backgroundColor: BLUE, borderRadius: 4 }]
+    },
+    options: {
+      ...baseOpts({ indexAxis: 'y' }),
+      scales: {
+        x: { ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        y: { grid:{display:false}, border:{display:false} }
+      },
+      plugins: { ...baseOpts().plugins, tooltip:{callbacks:{label:ctx=>fmt$(ctx.raw)}} }
+    }
+  });
+}
+
+function renderPace(id, type, seasons) {
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: {
+      labels: SEASONS,
+      datasets: [{ data: SEASONS.map(s=>D.rev_by_type_cutoff[s][type]), backgroundColor: SEASONS.map(s=>s==='2026'?RED:BLUE), borderRadius: 5 }]
+    },
+    options: {
+      ...baseOpts(),
+      scales: {
+        y: { ticks:{callback:v=>'$'+(v/1000000).toFixed(2)+'M'}, grid:{color:'#f3f4f6'}, border:{display:false} },
+        x: { grid:{display:false}, border:{display:false} }
+      },
+      plugins: { ...baseOpts().plugins, tooltip:{callbacks:{label:ctx=>fmt$(ctx.raw)+(ctx.label==='2026'?' (30% through season)':'')}} }
+    }
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderOverview();
+</script>
+</body>
+</html>
+
+
